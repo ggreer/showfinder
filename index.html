@@ -19,7 +19,15 @@
       </div>
       <div class="row">
         <div class="col-md-12">
+          Your shows
           <div id="show_list">
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="col-md-12">
+          <div id="providers">
           </div>
         </div>
       </div>
@@ -31,9 +39,14 @@
 <script type="text/javascript">
 /* global $, _ */
 var show_input_elem,
+  show_list = [],
   show_list_elem,
   show_names,
-  show_mapping;
+  show_mapping,
+  providers,
+  providers_elem,
+  provider_mapping = {},
+  provider_url;
 
 show_mapping = {
   "South Park": ["Hulu", "Sling"],
@@ -42,8 +55,6 @@ show_mapping = {
   "Saturday Night Live": ["Amazon", "Netflix"],
   "Modern Family": ["Amazon", "Netflix"],
   "Glee": ["Amazon", "Netflix"],
-  "American Idol": ["Amazon", "Sling"],
-  "The Voice": ["Hulu", "Sling"],
   "Archer": ["Hulu", "Sling"],
   "New Girl": ["Hulu", "Sling"],
   "Community": ["Hulu", "Netflix"],
@@ -53,7 +64,42 @@ show_mapping = {
   "Mindy Project": ["Hulu", "Netflix"],
 };
 
+show_url = {
+  "South Park": "http://ib4.huluim.com/show/6979?size=220x124&region=us",
+  "Family Guy": "http://ib3.huluim.com/show/54?size=220x124&region=us",
+  "The Simpsons": "http://ib3.huluim.com/show/58?size=220x124&region=us",
+  "Saturday Night Live": "http://ib2.huluim.com/show/77?size=220x124&region=us",
+  "Modern Family": "http://ib2.huluim.com/show/2553?size=220x124&region=us",
+  "Glee": "http://ib4.huluim.com/show/2103?size=220x124&region=us",
+  "Archer": "http://ib2.huluim.com/show/3433?size=220x124&region=us",
+  "New Girl": "http://ib2.huluim.com/show/7529?size=220x124&region=us",
+  "Community": "http://ib2.huluim.com/show/2505?size=220x124&region=us",
+  "Parenthood": "http://ib2.huluim.com/show/3897?size=220x124&region=us",
+  "Revenge": "http://ib1.huluim.com/show/7556?size=220x124&region=us",
+  "Nashville": "http://ib3.huluim.com/show/11226?size=220x124&region=us",
+  "Mindy Project": "http://ib1.huluim.com/show/11248?size=220x124&region=us",
+};
+
+provider_url = {
+    "Netflix": "http://appshopper.com/blog/wp-content/uploads/2010/05/netflix-icon.png",
+    "Amazon": "http://media.idownloadblog.com/wp-content/uploads/2014/04/Amazon-Instant-Video-2.5-for-iOS-app-icon-small.png",
+    "Hulu": "http://joern.bredereck.net/bluecop-mirror/svn/trunk/plugin.video.hulu/resources/images/icon.png",
+    "Sling": "http://www.sling.com/images/logo.png",
+};
+
 show_names = _.keys(show_mapping);
+providers = _.uniq(_.flatten(_.values(show_mapping)));
+_.each(providers, function (provider) {
+  var shows = [];
+  _.each(show_mapping, function (v, k) {
+    if (_.contains(v, provider)) {
+      shows.push(k);
+    }
+  });
+  provider_mapping[provider] = shows;
+});
+console.log(provider_mapping);
+providers_elem = $("#providers");
 
 show_input_elem = $("#show_autocomplete");
 show_list_elem = $("#show_list");
@@ -87,7 +133,52 @@ $("#add_show_form").submit(function (e) {
 });
 
 function add_show(name) {
+  show_list.push(name);
   show_list_elem.append(name + "<br />");
+  update_providers();
+}
+
+function update_providers() {
+  providers_elem.empty();
+  provider_show_has = {};
+  _.each(provider_mapping, function (shows, provider) {
+    _.each(show_list, function (show) {
+      if (_.isUndefined(provider_show_has[provider])) {
+        provider_show_has[provider] = {
+          available: [],
+          unavailable: [],
+        };
+      }
+      if (_.contains(shows, show)) {
+        provider_show_has[provider].available.push(show);
+      } else {
+        provider_show_has[provider].unavailable.push(show);
+      }
+    });
+  });
+  console.log(provider_show_has);
+
+  _.each(provider_show_has, function (v, k) {
+    providers_elem.append("<div class=\"col-md-4\">");
+    providers_elem.append("<h3>" + k + "</h3>");
+    if (v.available.length > 0) {
+      var p = "<p class=\"alert alert-success\">";
+      _.each(v.available, function (show) {
+        p += show + "&nbsp;";
+      });
+      p += "</p>";
+      providers_elem.append(p);
+    }
+    if (v.unavailable.length > 0) {
+      var p = "<p class=\"alert alert-warning\">";
+      _.each(v.unavailable, function (show) {
+        p += show + "&nbsp;";
+      });
+      p += "</p>";
+      providers_elem.append(p);
+    }
+    providers_elem.append("</div>");
+  });
 }
 </script>
 </html>
