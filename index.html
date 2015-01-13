@@ -10,7 +10,10 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-12">
-          Show name <input id="show_autocomplete" type="text" value="" prompt="Type show here" />
+          <form id="add_show_form">
+            Show name <input id="show_autocomplete" type="text" value="" prompt="Type show here" />
+            <input type="submit" value="Add show" />
+          </form>
         </div>
       </div>
       <div class="row">
@@ -32,11 +35,21 @@ show_input_elem = $("#show_autocomplete");
 show_list_elem = $("#show_list");
 
 show_input_elem.change(function (e) {
-  
+  console.log("Changed to", show_input_elem.val());
 });
 
+$("#add_show_form").submit(function (e) {
+  var v = show_input_elem.val();
+  e.preventDefault();
+  console.log("Submitted", v);
+  add_show(v);
+  return false;
+});
+
+
+
 function add_show(name) {
-  show_list_elem.append(name);
+  show_list_elem.append(name + "<br />");
 }
 </script>
 </html>
